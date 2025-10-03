@@ -103,8 +103,59 @@ function nearestDot(pos){
 }
 
 canvas.addEventListener('pointerdown', e=>{
-  drawing=true;
+  // Start a fresh pattern on each new touch
+  path = [];
+  drawing = true;
   lastPos = getPointerPos(e);
+  const nd = nearestDot(lastPos);
+  if(nd){
+    path.push(nd);
+  }
+  drawBoard();
+  e.preventDefault();
+});
+
+canvas.addEventListener('pointermove', e=>{
+  if(!drawing) return;
+  lastPos = getPointerPos(e);
+  const nd = nearestDot(lastPos);
+  if(nd){
+    const last = path[path.length - 1];
+    if(!last || last.id !== nd.id){ // avoid duplicates while staying on same dot
+      path.push(nd);
+    }
+  }
+  drawBoard();
+  e.preventDefault();
+});
+
+window.addEventListener('pointerup', e=>{
+  drawing=false;
+  lastPos=null;
+  drawBoard();
+});
+
+document.getElementById('clear').addEventListener('click', ()=>{
+  path=[];
+  drawBoard();
+});
+
+document.getElementById('copy').addEventListener('click', ()=>{
+  const seq = path.map(p=>p.id).join('');
+  if(seq.length === 0){
+    alert("No pattern drawn yet!");
+    return;
+  }
+  navigator.clipboard.writeText(seq).then(()=>{
+    alert("Pattern copied: " + seq);
+  });
+});
+
+// initial draw
+drawBoard();
+</script>
+</body>
+</html>  lastPos = getPointerPos(e);
   const nd = nearestDot(lastPos);
   if(nd){
     const last = path[path.length - 1];
